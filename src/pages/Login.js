@@ -5,7 +5,7 @@ import { UserOutlined, LogoutOutlined } from "@ant-design/icons";
 import { useCallback, useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { LOG_IN_REQUEST } from "../reducers/user";
+import { LOG_IN_REQUEST, USER_INFO_REQUEST } from "../reducers/user";
 
 const ErrorWrapper = styled.div`
     color: red;
@@ -61,6 +61,12 @@ const Login = () => {
         },
         [password]
     );
+
+    useEffect(() => {
+        dispatch({
+            type: USER_INFO_REQUEST,
+        });
+    }, []);
 
     useEffect(() => {
         console.log(inputRef);

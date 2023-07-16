@@ -17,9 +17,14 @@ import {
 
 import DaumPostcode from "react-daum-postcode";
 import Modal from "react-modal";
-import { useDispatch } from "react-redux";
-import { ITEM_ADD_REQUEST } from "../reducers/map";
+import { useDispatch, useSelector } from "react-redux";
+import {
+    IMAGE_REMOVE_REQUEST,
+    IMAGE_UPLOAD_REQUEST,
+    ITEM_ADD_REQUEST,
+} from "../reducers/map";
 import AddressInput from "../components/AddressInput";
+import { USER_INFO_REQUEST } from "../reducers/user";
 const InputWrapper = styled.div`
     width: 500px;
 
@@ -31,6 +36,8 @@ const InputWrapper = styled.div`
 `;
 
 const ItemPost = () => {
+    const { imagePaths } = useSelector((state) => state.map);
+
     const [markerPosition, setMarkerPosition] = useState({
         lat: "",
         lng: "",
@@ -53,6 +60,7 @@ const ItemPost = () => {
                 lat: e.latLng.lat(),
                 lng: e.latLng.lng(),
             });
+            console.log("lat", e.latLng.lat(), "lng", e.latLng.lng());
         },
         [markerPosition]
     );
@@ -64,15 +72,20 @@ const ItemPost = () => {
     ];
 
     const dispatch = useDispatch();
+    useEffect(() => {
+        dispatch({
+            type: USER_INFO_REQUEST,
+        });
+    }, []);
 
     const [itemName, setItemName] = useState(""); //분실물이름
     //이미지
     const [content, setContent] = useState(""); //분실물내용
     const [reward, setReward] = useState(0); //사례금
-    const [date, setDate] = useState(); //날짜
     const [address, setAddress] = useState(""); //분실주소
     const [directValue, setDirectValue] = useState(true);
     const [deliveryValue, setDeliveryValue] = useState(true);
+    const [street, setStreet] = useState("");
 
     const imageInput = useRef();
 
@@ -82,16 +95,33 @@ const ItemPost = () => {
         imageInput.current.click();
     }, [imageInput.current]);
 
+    // const onRemoveImage = (data) => () => {
+    //     dispatch({
+    //         type: IMAGE_REMOVE_REQUEST,
+    //         data: {
+    //             fileName: data,
+    //         },
+    //     });
+    // };
+
+    const onRemoveImage = useCallback((data) => () => {
+        dispatch({
+            type: IMAGE_REMOVE_REQUEST,
+            data,
+        });
+    });
+
     const onChangeImages = useCallback((e) => {
         console.log("images", e.target.files);
-        // const imageFormData=new FormData();
-        // [].forEach.call(e.target.files,(f)=>{
-        //   imageFormData.append('image',f)
-        // })
-        // dispatch({
-        //   type:UPLOAD_IMAGES_REQUEST,
-        //   data:imageFormData
-        // })
+
+        const imageFormData = new FormData();
+        [].forEach.call(e.target.files, (f) => {
+            imageFormData.append("image", f);
+        });
+        dispatch({
+            type: IMAGE_UPLOAD_REQUEST,
+            data: imageFormData,
+        });
     }, []);
 
     const onChangeItemName = useCallback(
@@ -106,6 +136,13 @@ const ItemPost = () => {
             setContent(e.target.value);
         },
         [content]
+    );
+
+    const onChangeStreet = useCallback(
+        (e) => {
+            setStreet(e.target.value);
+        },
+        [street]
     );
 
     const addComma = (price) => {
@@ -123,16 +160,6 @@ const ItemPost = () => {
             setReward(str);
         },
         [reward]
-    );
-
-    const onChangeDate = useCallback(
-        (date, dateString) => {
-            console.log(date);
-            console.log(dateString);
-
-            setDate(dateString);
-        },
-        [date]
     );
 
     // useEffect(() => {
@@ -184,7 +211,6 @@ const ItemPost = () => {
             "asdasd",
             itemName,
             content,
-            date,
             address,
             directValue,
             deliveryValue
@@ -192,50 +218,33 @@ const ItemPost = () => {
         dispatch({
             type: ITEM_ADD_REQUEST,
             data: {
-                id: Math.floor(Math.random() * 101),
-                name: itemName,
+                itemName,
                 content,
-                image: [
-                    {
-                        id: Math.floor(Math.random() * 101),
-                        url: "https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyMzA0MjZfMTY1%2FMDAxNjgyNTIxMTI1NzEz.4aBRLNug9Kzv0BYB7uPLkykxW1pDfVSfJbvGFcizdgAg.CdgvAL-PpYhz6WimFoEj4QW8QUtkfMb1aXopy-iHFvcg.PNG.leehs0560%2Fimage.png&type=a340",
-                    },
-                ],
-                reward,
-                createdAt: date,
                 tradeType: {
                     direct: directValue,
                     delivery: deliveryValue,
                 },
+                reward,
                 address: {
-                    lat: markerPosition.lat,
-                    lng: markerPosition.lng,
+                    street,
+                    latitude: markerPosition.lat,
+                    longitude: markerPosition.lng,
                 },
+
+                images: imagePaths,
             },
         });
     }, [
         itemName,
         content,
-        date,
         address,
         directValue,
         deliveryValue,
         markerPosition,
+        street,
+        imagePaths,
     ]);
 
-    const asd = () => {
-        setReward(reward + "원");
-    };
-
-    // const [itemName,setItemName]=useState('')//분실물이름
-    // //이미지
-    // const [content,setContent]=useState('')//분실물내용
-    // const [reward,setReward]=useState(0)//사례금
-    // const [date,setDate]=useState('')//날짜
-    // const [address,setAddress]=useState('')//분실주소
-    // const [category,setCategory]=useState('')
-    // const [directValue,setDirectValue]=useState('')
-    // const [deliveryValue,setDeliveryValue]=useState('')
     return (
         <div>
             <InputWrapper>
@@ -244,6 +253,24 @@ const ItemPost = () => {
                         {/* 1.onchange 함수가발동될때마다 이미지를 서버에 저장시키고 경로를 받아와서 리듀서에 저장후 화면에뿌린다
                     2.폼 등록 버튼을 누를때 그 이미지경로를 가져와서 디비에 저장시킨다
                 */}
+                        {imagePaths.map((v, i) => (
+                            <div key={v} style={{ display: "inline-block" }}>
+                                <img
+                                    src={`http://localhost:8080/uploads/images/${v.fileName}`}
+                                    style={{ width: "200px" }}
+                                    alt={v}
+                                />
+                                <div>
+                                    <Button onClick={onRemoveImage(v.fileName)}>
+                                        제거
+                                    </Button>
+                                </div>
+                            </div>
+                        ))}
+                        {/* {imagePaths.map((v)=>(
+                        <img src=``></img>
+                    ))} */}
+
                         <input
                             type="file"
                             multiple
@@ -297,7 +324,11 @@ const ItemPost = () => {
                     </Form.Item>
 
                     <Form.Item required label="상세주소">
-                        <Input placeholder="상세주소를 입력해주세요"></Input>
+                        <Input
+                            placeholder="상세주소를 입력해주세요"
+                            value={street}
+                            onChange={onChangeStreet}
+                        ></Input>
                     </Form.Item>
 
                     <Form.Item required label="배송">
@@ -337,14 +368,6 @@ const ItemPost = () => {
                                     원
                                 </div>
                             </div>
-                        </Form.Item>
-                        <Form.Item
-                            required
-                            style={{ marginLeft: 80 }}
-                            valuePropName={"date"}
-                            label="분실날짜"
-                        >
-                            <DatePicker onChange={onChangeDate}></DatePicker>
                         </Form.Item>
                     </div>
 

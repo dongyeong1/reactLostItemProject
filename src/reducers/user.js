@@ -1,66 +1,70 @@
+import { BranchesOutlined } from "@ant-design/icons";
 import produce from "immer";
 
 export const initialState = {
-    user: {
-        id: 1,
-        name: "김동영",
-        email: "dong@dong",
-        nickname: "dongyeong",
-        notification: [
-            {
-                id: 1,
-                message: "메세지가 도착했습니다",
-                type: "chat",
-                read: false,
-            },
-            {
-                id: 2,
-                message: "거래가 성사되었습니다",
-                type: "trade",
-                read: false,
-            },
-        ],
-        myLostItems: [
-            {
-                id: 1,
-                name: "에어팟",
-                createdAt: "2022-10-02",
-                status: false,
-                reward: 20000,
-            },
-            {
-                id: 2,
-                name: "책",
-                createdAt: "2023-02-02",
-                status: true,
-                reward: 30000,
-            },
-            {
-                id: 3,
-                name: "음식",
-                createdAt: "2023-02-02",
-                status: true,
-                reward: 20000,
-            },
-        ],
-        findLostItems: [
-            {
-                id: 1,
-                name: "노트북",
-                createdAt: "2021-10-02",
-                reward: 10000,
-            },
-            {
-                id: 2,
-                name: "휴대폰",
-                createdAt: "2022-02-02",
-                reward: 10000,
-            },
-        ],
-    },
-    loadMyInfoLoading: false, // 유저 정보 가져오기 시도중
-    loadMyInfoDone: false,
-    loadMyInfoError: null,
+    // user: {
+    //     id: 1,
+    //     name: "김동영",
+    //     email: "dong@dong",
+    //     nickname: "dongyeong",
+    //     notification: [
+    //         {
+    //             id: 1,
+    //             message: "메세지가 도착했습니다",
+    //             type: "chat",
+    //             read: false,
+    //         },
+    //         {
+    //             id: 2,
+    //             message: "거래가 성사되었습니다",
+    //             type: "trade",
+    //             read: false,
+    //         },
+    //     ],
+    //     myLostItems: [
+    //         {
+    //             id: 1,
+    //             name: "에어팟",
+    //             createdAt: "2022-10-02",
+    //             status: false,
+    //             reward: 20000,
+    //         },
+    //         {
+    //             id: 2,
+    //             name: "책",
+    //             createdAt: "2023-02-02",
+    //             status: true,
+    //             reward: 30000,
+    //         },
+    //         {
+    //             id: 3,
+    //             name: "음식",
+    //             createdAt: "2023-02-02",
+    //             status: true,
+    //             reward: 20000,
+    //         },
+    //     ],
+    //     findLostItems: [
+    //         {
+    //             id: 1,
+    //             name: "노트북",
+    //             createdAt: "2021-10-02",
+    //             reward: 10000,
+    //         },
+    //         {
+    //             id: 2,
+    //             name: "휴대폰",
+    //             createdAt: "2022-02-02",
+    //             reward: 10000,
+    //         },
+    //     ],
+    // },
+    user: null,
+    userInfoLoading: false, // 유저 정보 가져오기 시도중
+    userInfoDone: false,
+    userInfoError: null,
+
+    ////
     followLoading: false, // 팔로우 시도중
     followDone: false,
     followError: null,
@@ -93,6 +97,29 @@ export const initialState = {
     loginData: {},
 };
 
+/////////
+export const LOG_IN_REQUEST = "LOG_IN_REQUEST";
+export const LOG_IN_SUCCESS = "LOG_IN_SUCCESS";
+export const LOG_IN_FAILURE = "LOG_IN_FAILURE";
+
+export const LOG_OUT_REQUEST = "LOG_OUT_REQUEST";
+export const LOG_OUT_SUCCESS = "LOG_OUT_SUCCESS";
+export const LOG_OUT_FAILURE = "LOG_OUT_FAILURE";
+
+export const SIGN_UP_REQUEST = "SIGN_UP_REQUEST";
+export const SIGN_UP_SUCCESS = "SIGN_UP_SUCCESS";
+export const SIGN_UP_FAILURE = "SIGN_UP_FAILURE";
+
+export const USER_INFO_REQUEST = "USER_INFO_REQUEST";
+export const USER_INFO_SUCCESS = "USER_INFO_SUCCESS";
+export const USER_INFO_FAILURE = "USER_INFO_FAILURE";
+
+export const USER_IMAGE_REMOVE_REQUEST = "USER_IMAGE_REMOVE_REQUEST";
+
+export const USER_ITEM_EDIT_SUCCESS = "USER_ITEM_EDIT_SUCCESS";
+
+/////////
+
 export const USER_EDIT_REQUEST = "USER_EDIT_REQUEST";
 export const USER_EDIT_SUCCESS = "USER_EDIT_SUCCESS";
 export const USER_EDIT_FAIL = "USER_EDIT_FAIL";
@@ -106,18 +133,6 @@ export const ITEM_DELETE_FAIL = "ITEM_DELETE_FAIL";
 export const LOAD_MY_INFO_REQUEST = "LOAD_MY_INFO_REQUEST";
 export const LOAD_MY_INFO_SUCCESS = "LOAD_MY_INFO_SUCCESS";
 export const LOAD_MY_INFO_FAILURE = "LOAD_MY_INFO_FAILURE";
-
-export const LOG_IN_REQUEST = "LOG_IN_REQUEST";
-export const LOG_IN_SUCCESS = "LOG_IN_SUCCESS";
-export const LOG_IN_FAILURE = "LOG_IN_FAILURE";
-
-export const LOG_OUT_REQUEST = "LOG_OUT_REQUEST";
-export const LOG_OUT_SUCCESS = "LOG_OUT_SUCCESS";
-export const LOG_OUT_FAILURE = "LOG_OUT_FAILURE";
-
-export const SIGN_UP_REQUEST = "SIGN_UP_REQUEST";
-export const SIGN_UP_SUCCESS = "SIGN_UP_SUCCESS";
-export const SIGN_UP_FAILURE = "SIGN_UP_FAILURE";
 
 export const CHANGE_NICKNAME_REQUEST = "CHANGE_NICKNAME_REQUEST";
 export const CHANGE_NICKNAME_SUCCESS = "CHANGE_NICKNAME_SUCCESS";
@@ -146,23 +161,6 @@ export const REMOVE_FOLLOWER_FAILURE = "REMOVE_FOLLOWER_FAILURE";
 export const ADD_POST_TO_ME = "ADD_POST_TO_ME";
 export const REMOVE_POST_OF_ME = "REMOVE_POST_OF_ME";
 
-const dummyUser = (data) => ({
-    ...data,
-    nickname: "제로초",
-    id: 1,
-    Posts: [],
-    Followings: [
-        { nickname: "부기초" },
-        { nickname: "Chanho Lee" },
-        { nickname: "neue zeal" },
-    ],
-    Followers: [
-        { nickname: "부기초" },
-        { nickname: "Chanho Lee" },
-        { nickname: "neue zeal" },
-    ],
-});
-
 export const loginRequestAction = (data) => ({
     type: LOG_IN_REQUEST,
     data,
@@ -175,6 +173,84 @@ export const logoutRequestAction = () => ({
 const reducer = (state = initialState, action) =>
     produce(state, (draft) => {
         switch (action.type) {
+            case USER_ITEM_EDIT_SUCCESS:
+                const userIndexNumber = draft.user.writePosts.findIndex(
+                    (v) => v.id === action.data.data.id
+                );
+                draft.user.writePosts[userIndexNumber] = action.data.data;
+                break;
+
+            case USER_IMAGE_REMOVE_REQUEST:
+                const indexNumber = draft.user.writePosts.findIndex(
+                    (v) => v.id === action.data.itemId
+                );
+                console.log("aqqqqqqqqq", action.data.itemId);
+                console.log("asdasdasd", indexNumber);
+                draft.user.writePosts[indexNumber].images =
+                    draft.user.writePosts[indexNumber].images.filter(
+                        (v) => v.fileName !== action.data.filename
+                    );
+                break;
+            case LOG_IN_REQUEST:
+                draft.logInLoading = true;
+                draft.logInError = null;
+                draft.logInDone = false;
+                break;
+            case LOG_IN_SUCCESS:
+                draft.logInLoading = false;
+                draft.user = action.data.data;
+                draft.logInDone = true;
+                break;
+            case LOG_IN_FAILURE:
+                draft.logInLoading = false;
+                draft.logInError = action.error;
+                break;
+
+            case LOG_OUT_REQUEST:
+                draft.logOutLoading = true;
+                draft.logOutError = null;
+                draft.logOutDone = false;
+                break;
+            case LOG_OUT_SUCCESS:
+                draft.logOutLoading = false;
+                draft.logOutDone = true;
+                draft.user = null;
+                break;
+            case LOG_OUT_FAILURE:
+                draft.logOutLoading = false;
+                draft.logOutError = action.error;
+                break;
+
+            case SIGN_UP_REQUEST:
+                draft.signUpLoading = true;
+                draft.signUpError = null;
+                draft.signUpDone = false;
+                break;
+            case SIGN_UP_SUCCESS:
+                draft.signUpLoading = false;
+                draft.signUpDone = true;
+                break;
+            case SIGN_UP_FAILURE:
+                draft.signUpLoading = false;
+                draft.signUpError = action.error;
+                break;
+
+            case USER_INFO_REQUEST:
+                draft.userInfoLoading = true;
+                draft.userInfoDone = false;
+                draft.userInfoError = null;
+                break;
+            case USER_INFO_SUCCESS:
+                draft.userInfoLoading = false;
+                draft.userInfoDone = true;
+                draft.user = action.data.data;
+                break;
+            case USER_INFO_FAILURE:
+                draft.userInfoLoading = false;
+                draft.userInfoError = action.data;
+                break;
+
+            /////////////
             case ITEM_DELETE_REQUEST:
                 draft.user.myLostItems = draft.user.myLostItems.filter(
                     (v) => v.id !== action.data.id
@@ -282,47 +358,7 @@ const reducer = (state = initialState, action) =>
                 draft.unfollowLoading = false;
                 draft.unfollowError = action.error;
                 break;
-            case LOG_IN_REQUEST:
-                draft.logInLoading = true;
-                draft.logInError = null;
-                draft.logInDone = false;
-                break;
-            case LOG_IN_SUCCESS:
-                draft.logInLoading = false;
-                draft.user = action.data;
-                draft.logInDone = true;
-                break;
-            case LOG_IN_FAILURE:
-                draft.logInLoading = false;
-                draft.logInError = action.error;
-                break;
-            case LOG_OUT_REQUEST:
-                draft.logOutLoading = true;
-                draft.logOutError = null;
-                draft.logOutDone = false;
-                break;
-            case LOG_OUT_SUCCESS:
-                draft.logOutLoading = false;
-                draft.logOutDone = true;
-                draft.me = null;
-                break;
-            case LOG_OUT_FAILURE:
-                draft.logOutLoading = false;
-                draft.logOutError = action.error;
-                break;
-            case SIGN_UP_REQUEST:
-                draft.signUpLoading = true;
-                draft.signUpError = null;
-                draft.signUpDone = false;
-                break;
-            case SIGN_UP_SUCCESS:
-                draft.signUpLoading = false;
-                draft.signUpDone = true;
-                break;
-            case SIGN_UP_FAILURE:
-                draft.signUpLoading = false;
-                draft.signUpError = action.error;
-                break;
+
             // case SIGN_UP_TWOSUCCESS:
             //     draft.signUpDone = false;
             case CHANGE_NICKNAME_REQUEST:

@@ -1,11 +1,16 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Form, Input, Modal, Button } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import { USER_EDIT_REQUEST } from "../reducers/user";
+import { USER_EDIT_REQUEST, USER_INFO_REQUEST } from "../reducers/user";
 
 const UserEditModal = ({ showUserModal, setShowUserModal }) => {
     const dispatch = useDispatch();
 
+    // useEffect(() => {
+    //     dispatch({
+    //         type: USER_INFO_REQUEST,
+    //     });
+    // }, []);
     const { user } = useSelector((state) => state.user);
 
     const [email, setEmail] = useState("");
@@ -46,7 +51,7 @@ const UserEditModal = ({ showUserModal, setShowUserModal }) => {
                     <Input
                         size="large"
                         style={{ borderRadius: 100, width: 400 }}
-                        placeholder={user.email}
+                        placeholder={user && user.email}
                         value={email}
                         onChange={onChangeEmail}
                     ></Input>
@@ -55,7 +60,7 @@ const UserEditModal = ({ showUserModal, setShowUserModal }) => {
                     <Input
                         size="large"
                         style={{ borderRadius: 100, width: 400 }}
-                        placeholder={user.nickname}
+                        placeholder={user && user.nickname}
                         value={nickname}
                         onChange={onChangeNickname}
                     ></Input>

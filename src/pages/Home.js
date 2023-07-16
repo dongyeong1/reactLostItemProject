@@ -12,6 +12,7 @@ import GeoCode from "../components/GeoCode";
 import { useDispatch } from "react-redux";
 import { SEARCH_LOCATION_REQUEST } from "../reducers/map";
 import { useNavigate } from "react-router-dom";
+import { USER_INFO_REQUEST } from "../reducers/user";
 
 const SearchWrapper = styled(Input)`
     // margin-left:710px;
@@ -26,6 +27,12 @@ const Home = () => {
     const [errorText, setErrorText] = useState("");
 
     const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch({
+            type: USER_INFO_REQUEST,
+        });
+    }, []);
 
     useEffect(() => {
         setErrorText("없는 지역입니다");
@@ -68,12 +75,23 @@ const Home = () => {
 
     return (
         <div>
+            <section
+                style={{
+                    backgroundImage: `url(
+                        "img/searchlogo.png"
+                    )`,
+                    backgroundSize: "1920px 800px",
+                    width: "100%",
+                    height: 400,
+                    margin: "auto",
+                }}
+            ></section>
             <div
                 style={{
                     textAlign: "center",
                     width: 500,
                     margin: "auto",
-                    marginTop: 250,
+                    marginTop: 50,
                     marginBottom: 30,
                     fontSize: 25,
                 }}

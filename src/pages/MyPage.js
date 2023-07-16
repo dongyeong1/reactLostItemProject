@@ -6,7 +6,12 @@ import TopLayout from "../components/TopLayout";
 import { useDispatch, useSelector } from "react-redux";
 import UserEditModal from "../components/UserEditModal";
 import LostItemEditModal from "../components/LostItemEditModal";
-import { ITEM_DELETE_REQUEST, ITEM_DELETE_SUCCESS } from "../reducers/user";
+import {
+    ITEM_DELETE_REQUEST,
+    ITEM_DELETE_SUCCESS,
+    USER_INFO_REQUEST,
+} from "../reducers/user";
+import { IMAGE_PATHS_REQUEST } from "../reducers/map";
 
 const MyPage = () => {
     const { confirm } = Modal;
@@ -18,20 +23,29 @@ const MyPage = () => {
     const [showItemEditModal, setShowItemEditModal] = useState(false);
     const [showItemDeleteModal, setShowItemDeleteModal] = useState(false);
 
-    const [itemId, setItemId] = useState();
+    const [itemContent, setItemContent] = useState();
 
     const userEditModalHandle = useCallback(() => {
         setShowUserModal(true);
     }, [showUserModal]);
 
     const ItemEditModalHandle = useCallback(
-        (id) => {
+        (item) => {
             setShowItemEditModal(true);
-            setItemId(id);
+            setItemContent(item);
+            dispatch({
+                type: IMAGE_PATHS_REQUEST,
+                data: item.images,
+            });
         },
-        [showItemEditModal]
+        [showItemEditModal, itemContent]
     );
 
+    useEffect(() => {
+        dispatch({
+            type: USER_INFO_REQUEST,
+        });
+    }, []);
     const ItemDeleteModalShow = useCallback(() => {
         setShowItemDeleteModal(true);
     }, [showItemDeleteModal]);
@@ -90,10 +104,14 @@ const MyPage = () => {
                             icon={<UserOutlined />}
                         />
                         <div style={{ marginLeft: 10, marginTop: 50 }}>
-                            <h1>이메일</h1>
-                            <p>{user.email}</p>
-                            <h1>닉네임</h1>
-                            <p>{user.nickname}</p>
+                            {user && (
+                                <div>
+                                    <h1>이메일</h1>
+                                    <p>{user.email}</p>
+                                    <h1>닉네임</h1>
+                                    <p>{user.nickname}</p>
+                                </div>
+                            )}
                         </div>
                         <Button
                             type="primary"
@@ -128,73 +146,85 @@ const MyPage = () => {
                             <h2>등록한 분실물</h2>{" "}
                         </div>
                         <div>
-                            <List
-                                dataSource={user.myLostItems}
-                                renderItem={(item, index) => (
-                                    <>
-                                        <List.Item
-                                            actions={[
-                                                <a
-                                                    onClick={() =>
-                                                        ItemEditModalHandle(
-                                                            item.id
-                                                        )
-                                                    }
-                                                    key="list-loadmore-edit"
-                                                >
-                                                    수정
-                                                </a>,
-                                                <a
-                                                    onClick={() =>
-                                                        showConfirm(item.id)
-                                                    }
-                                                    key="list-loadmore-more"
-                                                >
-                                                    삭제
-                                                </a>,
-                                            ]}
-                                        >
-                                            <div style={{ display: "flex" }}>
-                                                <div>{index + 1}.</div>
+                            {user && (
+                                <List
+                                    dataSource={user.writePosts}
+                                    renderItem={(item, index) => (
+                                        <>
+                                            <List.Item
+                                                actions={[
+                                                    <a
+                                                        onClick={() =>
+                                                            ItemEditModalHandle(
+                                                                item
+                                                            )
+                                                        }
+                                                        key="list-loadmore-edit"
+                                                    >
+                                                        수정
+                                                    </a>,
+                                                    <a
+                                                        onClick={() =>
+                                                            showConfirm(item.id)
+                                                        }
+                                                        key="list-loadmore-more"
+                                                    >
+                                                        삭제
+                                                    </a>,
+                                                ]}
+                                            >
                                                 <div
-                                                    style={{
-                                                        width: 100,
-                                                        marginLeft: 100,
-                                                    }}
+                                                    style={{ display: "flex" }}
                                                 >
-                                                    {item.name}
+                                                    <div>{index + 1}.</div>
+                                                    <div
+                                                        style={{
+                                                            width: 100,
+                                                            marginLeft: 100,
+                                                        }}
+                                                    >
+                                                        {item.name}
+                                                    </div>
+                                                    <div
+                                                        style={{
+                                                            width: 100,
+                                                            marginLeft: 20,
+                                                        }}
+                                                    >
+                                                        {item.reward} 원
+                                                    </div>
+                                                    <div
+                                                        style={{
+                                                            marginLeft: 50,
+                                                        }}
+                                                    >
+                                                        {item.createdAt}
+                                                    </div>
+                                                    <div
+                                                        style={{
+                                                            marginLeft: 100,
+                                                        }}
+                                                    >
+                                                        {item.status
+                                                            ? "찾는중"
+                                                            : "찾음"}
+                                                    </div>
+                                                    {/* <Button  onClick={ItemEditModalHandle(item.id)}>asdas</Button> */}
                                                 </div>
-                                                <div
-                                                    style={{
-                                                        width: 100,
-                                                        marginLeft: 20,
-                                                    }}
-                                                >
-                                                    {item.reward} 원
-                                                </div>
-                                                <div style={{ marginLeft: 50 }}>
-                                                    {item.createdAt}
-                                                </div>
-                                                <div
-                                                    style={{ marginLeft: 100 }}
-                                                >
-                                                    {item.status
-                                                        ? "찾는중"
-                                                        : "찾음"}
-                                                </div>
-                                                {/* <Button  onClick={ItemEditModalHandle(item.id)}>asdas</Button> */}
-                                            </div>
-                                        </List.Item>
-                                    </>
-                                )}
-                            ></List>
+                                            </List.Item>
+                                        </>
+                                    )}
+                                ></List>
+                            )}
                         </div>
                     </Card>
-                    <LostItemEditModal
-                        itemId={itemId}
-                        showItemEditModal={showItemEditModal}
-                        setShowItemEditModal={setShowItemEditModal}
-                    ></LostItemEditModal>
+                    {showItemEditModal ? (
+                        <LostItemEditModal
+                            itemContent={itemContent}
+                            showItemEditModal={showItemEditModal}
+                            setShowItemEditModal={setShowItemEditModal}
+                        ></LostItemEditModal>
+                    ) : null}
                     <Card
                         style={{
                             marginTop: 50,
@@ -209,30 +239,32 @@ const MyPage = () => {
                             <h2>찾아준 분실물</h2>{" "}
                         </div>
                         <div>
-                            <List
-                                dataSource={user.findLostItems}
-                                renderItem={(item, index) => (
-                                    <List.Item>
-                                        <div style={{ display: "flex" }}>
-                                            <div>{index + 1}.</div>
-                                            <div
-                                                style={{
-                                                    width: 200,
-                                                    marginLeft: 150,
-                                                }}
-                                            >
-                                                {item.name}
+                            {user && (
+                                <List
+                                    dataSource={user.findPosts}
+                                    renderItem={(item, index) => (
+                                        <List.Item>
+                                            <div style={{ display: "flex" }}>
+                                                <div>{index + 1}.</div>
+                                                <div
+                                                    style={{
+                                                        width: 200,
+                                                        marginLeft: 150,
+                                                    }}
+                                                >
+                                                    {item.name}
+                                                </div>
+                                                <div style={{ width: 150 }}>
+                                                    {item.reward} 원
+                                                </div>
+                                                <div style={{}}>
+                                                    {item.createdAt}
+                                                </div>
                                             </div>
-                                            <div style={{ width: 150 }}>
-                                                {item.reward} 원
-                                            </div>
-                                            <div style={{}}>
-                                                {item.createdAt}
-                                            </div>
-                                        </div>
-                                    </List.Item>
-                                )}
-                            ></List>
+                                        </List.Item>
+                                    )}
+                                ></List>
+                            )}
                         </div>
                     </Card>
                 </Col>

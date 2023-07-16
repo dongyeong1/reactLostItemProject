@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
-import { SIGN_UP_REQUEST } from "../reducers/user";
+import { SIGN_UP_REQUEST, USER_INFO_REQUEST } from "../reducers/user";
 
 const ErrorWrapper = styled.div`
     color: red;
@@ -35,8 +35,8 @@ const Buttons = styled(Button)`
     width: 100px;
     height: 40px;
     border-radius: 100px;
-    margin-top: 50px;
-    margin-left: 120px;
+    // margin-top: 50px;
+    margin: 50px auto 0 auto;
 `;
 
 const SignUp = () => {
@@ -52,6 +52,11 @@ const SignUp = () => {
     const [pwError, setPwError] = useState(false);
     const [passwordError, setPasswordError] = useState(false);
 
+    useEffect(() => {
+        dispatch({
+            type: USER_INFO_REQUEST,
+        });
+    }, []);
     const success = () => {
         Modal.success({
             content: (
